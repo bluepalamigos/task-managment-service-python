@@ -1,3 +1,5 @@
+"""SQLAlchemy ORM model for the tasks table."""
+
 import enum
 import uuid
 from datetime import datetime, timezone
@@ -10,12 +12,26 @@ from app.db.base import Base
 
 
 class TaskStatus(str, enum.Enum):
+    """Allowed lifecycle states for a task."""
+
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
 
 
 class Task(Base):
+    """Represents a task stored in the ``tasks`` table.
+
+    Attributes:
+        id: UUID primary key, auto-generated.
+        title: Short summary of the task (max 255 chars).
+        description: Optional longer description.
+        status: Current lifecycle state.
+        is_deleted: Soft-delete flag.
+        created_at: Timestamp of creation (UTC).
+        updated_at: Timestamp of last update (UTC).
+    """
+
     __tablename__ = "tasks"
 
     id: Mapped[uuid.UUID] = mapped_column(

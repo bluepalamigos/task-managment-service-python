@@ -1,3 +1,5 @@
+"""Alembic migration environment for async PostgreSQL via SQLAlchemy."""
+
 import asyncio
 from logging.config import fileConfig
 

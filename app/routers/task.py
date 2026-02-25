@@ -1,3 +1,5 @@
+"""FastAPI router for task CRUD endpoints under ``/api/v1/tasks``."""
+
 import uuid
 from typing import Annotated
 
@@ -19,6 +21,14 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 def get_task_service(session: Annotated[AsyncSession, Depends(get_session)]) -> TaskService:
+    """FastAPI dependency that wires up a TaskService with a database session.
+
+    Args:
+        session: Async database session injected by FastAPI.
+
+    Returns:
+        A configured TaskService instance.
+    """
     repository = TaskRepository(session)
     return TaskService(repository)
 
@@ -33,6 +43,7 @@ ServiceDep = Annotated[TaskService, Depends(get_task_service)]
     responses={400: {"model": ErrorResponse}},
 )
 async def create_task(payload: TaskCreate, service: ServiceDep) -> TaskResponse:
+    """Create a new task."""
     return await service.create_task(payload)
 
 
@@ -42,6 +53,7 @@ async def list_tasks(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> PaginatedTaskResponse:
+    """List tasks with pagination."""
     return await service.list_tasks(limit=limit, offset=offset)
 
 
@@ -51,6 +63,7 @@ async def list_tasks(
     responses={404: {"model": ErrorResponse}},
 )
 async def get_task(task_id: uuid.UUID, service: ServiceDep) -> TaskResponse:
+    """Retrieve a single task by ID."""
     return await service.get_task(task_id)
 
 
@@ -62,6 +75,7 @@ async def get_task(task_id: uuid.UUID, service: ServiceDep) -> TaskResponse:
 async def update_task(
     task_id: uuid.UUID, payload: TaskUpdate, service: ServiceDep
 ) -> TaskResponse:
+    """Update an existing task. Only provided fields are changed."""
     return await service.update_task(task_id, payload)
 
 
@@ -71,4 +85,5 @@ async def update_task(
     responses={404: {"model": ErrorResponse}},
 )
 async def delete_task(task_id: uuid.UUID, service: ServiceDep) -> None:
+    """Soft-delete a task by ID."""
     await service.delete_task(task_id)

@@ -1,3 +1,8 @@
+"""FastAPI application entry point.
+
+Configures the app instance, middleware, routers, and exception handlers.
+"""
+
 import logging
 from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
@@ -17,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Application lifespan handler that sets up logging on startup."""
     setup_logging()
     logger.info("Application starting up")
     yield
@@ -38,6 +44,7 @@ app.include_router(task_router, prefix="/api/v1")
 
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+    """Convert AppException subclasses into structured JSON error responses."""
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail, "errors": exc.errors},
@@ -48,6 +55,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
+    """Convert Pydantic validation errors into a structured 422 response."""
     errors = []
     for err in exc.errors():
         errors.append({
@@ -63,6 +71,7 @@ async def validation_exception_handler(
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Catch-all handler that logs the exception and returns a 500 response."""
     logger.exception("Unhandled exception: %s", str(exc))
     return JSONResponse(
         status_code=500,
@@ -72,4 +81,5 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 @app.get("/health")
 async def health() -> dict[str, str]:
+    """Health check endpoint. Returns ``{"status": "ok"}``."""
     return {"status": "ok"}

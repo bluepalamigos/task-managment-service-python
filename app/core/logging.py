@@ -1,3 +1,5 @@
+"""Structured JSON logging configuration."""
+
 import json
 import logging
 import sys
@@ -7,7 +9,21 @@ from app.core.config import settings
 
 
 class JSONFormatter(logging.Formatter):
+    """Formats log records as single-line JSON objects.
+
+    Includes timestamp, level, logger name, message, and optional
+    request_id and exception fields.
+    """
+
     def format(self, record: logging.LogRecord) -> str:
+        """Format a log record as a JSON string.
+
+        Args:
+            record: The log record to format.
+
+        Returns:
+            A JSON-encoded string representing the log entry.
+        """
         log_entry: dict = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
@@ -22,6 +38,11 @@ class JSONFormatter(logging.Formatter):
 
 
 def setup_logging() -> None:
+    """Configure the root logger with JSON formatting to stdout.
+
+    Sets the log level from ``settings.log_level`` and suppresses
+    noisy loggers (uvicorn access, SQLAlchemy engine).
+    """
     root_logger = logging.getLogger()
     root_logger.setLevel(settings.log_level.upper())
 
